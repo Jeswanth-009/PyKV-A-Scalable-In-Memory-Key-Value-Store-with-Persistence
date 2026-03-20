@@ -39,9 +39,6 @@ At runtime, this project can act as a complete cache service and monitoring app:
   - Wires backend engine + persistence + replication + frontend page serving
   - Handles app lifespan startup/shutdown tasks
 
-- [FEATURES.md](FEATURES.md)
-  - Notes describing added features and operation model
-
 - [client.py](client.py)
   - Lightweight wrapper script (current behavior: informational output)
 
