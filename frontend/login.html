@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PYKV — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: #f5b59e;
+      background-image:
+        radial-gradient(ellipse 70% 55% at 15% 5%,  #fbd4c2 0%, transparent 55%),
+        radial-gradient(ellipse 55% 50% at 90% 95%, #e8937a 0%, transparent 50%),
+        radial-gradient(ellipse 40% 40% at 60% 45%, rgba(255,200,185,.3) 0%, transparent 60%);
+    }
+
+    .outer {
+      width: 100%;
+      max-width: 570px;
+      background: rgba(251, 214, 197, 0.42);
+      border-radius: 26px;
+      padding: 28px 24px;
+      box-shadow:
+        0 2px 0 rgba(255,255,255,.25) inset,
+        0 16px 60px rgba(160, 55, 35, .14);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .card {
+      background: rgba(255, 242, 236, 0.72);
+      border-radius: 18px;
+      padding: 38px 42px 42px;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.85) inset,
+        0 8px 32px rgba(160, 55, 35, .08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 36px;
+    }
+    .brand-icon {
+      width: 50px; height: 50px;
+      background: #350f1c;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 18px rgba(53, 15, 28, .42);
+    }
+    .brand-icon svg { width: 20px; height: 20px; }
+    .brand-name {
+      display: block;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.28rem; font-weight: 600;
+      color: #350f1c; line-height: 1.1; letter-spacing: .01em;
+    }
+    .brand-sub {
+      display: block;
+      font-size: .44rem; letter-spacing: .28em;
+      color: #9a6e68; margin-top: 4px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 3rem; font-weight: 600; font-style: italic;
+      color: #350f1c; line-height: 1.04;
+      margin-bottom: 8px; letter-spacing: -.01em;
+    }
+    .sub-text {
+      font-size: .67rem; color: #7a4a50;
+      margin-bottom: 32px; opacity: .88;
+    }
+
+    .err {
+      background: rgba(180, 45, 45, .08);
+      border: 1px solid rgba(180, 45, 45, .2);
+      border-radius: 10px; color: #7a2828;
+      padding: 11px 16px; font-size: .63rem;
+      margin-bottom: 18px; display: none; line-height: 1.5;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block; font-size: .45rem;
+      letter-spacing: .30em; color: #7a4a50;
+      text-transform: uppercase; font-weight: 500; margin-bottom: 9px;
+    }
+    .field input {
+      width: 100%;
+      background: rgba(255, 230, 220, 0.65);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      border-radius: 12px; color: #350f1c;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .87rem; padding: 16px 18px;
+      outline: none;
+      transition: background .2s, border-color .2s, box-shadow .2s;
+    }
+    .field input:focus {
+      background: rgba(255, 220, 208, 0.85);
+      border-color: rgba(150, 70, 70, .32);
+      box-shadow: 0 0 0 3px rgba(150, 70, 70, .1);
+    }
+    .field input::placeholder { color: #c09898; }
+
+    .btn {
+      width: 100%; background: #350f1c; border: none;
+      color: rgba(255, 215, 202, .92);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .60rem; font-weight: 500;
+      letter-spacing: .34em; padding: 18px;
+      border-radius: 12px; cursor: pointer; margin-top: 6px;
+      box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 6px 24px rgba(53, 15, 28, .38);
+      transition: background .2s, transform .12s, box-shadow .2s;
+    }
+    .btn:hover { background: #250a14; transform: translateY(-1px); box-shadow: 0 10px 32px rgba(53, 15, 28, .44); }
+    .btn:active { transform: translateY(0); }
+
+    .divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(150, 75, 65, .2); }
+    .divider span { font-size: .54rem; color: #9a7060; letter-spacing: .14em; }
+
+    .link-row { text-align: center; font-size: .66rem; color: #7a5050; }
+    .link-row a {
+      color: #350f1c; font-weight: 500;
+      text-decoration: underline; text-underline-offset: 3px;
+      text-decoration-color: rgba(53,15,28,.28);
+      transition: text-decoration-color .2s;
+    }
+    .link-row a:hover { text-decoration-color: #350f1c; }
+
+    .demo {
+      margin-top: 24px;
+      border: 1px dashed rgba(150, 75, 65, .25);
+      border-radius: 11px; padding: 14px 18px;
+      font-size: .63rem; color: #7a5050; line-height: 2;
+    }
+    .demo .demo-title { font-weight: 500; color: #5a2838; display: block; margin-bottom: 2px; }
+    .demo strong { color: #350f1c; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div class="outer">
+    <div class="card">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3L21 10L12 21L3 10L12 3Z" stroke="rgba(255,205,188,.65)" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M3 10H21" stroke="rgba(255,205,188,.65)" stroke-width="1.5"/>
+            <path d="M12 3L16.5 10L12 21L7.5 10L12 3Z" stroke="rgba(255,205,188,.3)" stroke-width="1" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">PYKV</span>
+          <span class="brand-sub">LRU &nbsp;·&nbsp; WEATHER &nbsp;·&nbsp; ENGINE</span>
+        </div>
+      </div>
+
+      <h1>Welcome back</h1>
+      <p class="sub-text">Sign in to access your dashboard</p>
+
+      <div class="err" id="error-msg"></div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="e.g. admin" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+
+      <button class="btn" onclick="handleLogin()">→ &nbsp;SIGN IN</button>
+
+      <div class="divider"><span>OR</span></div>
+      <div class="link-row">New here? <a href="http://127.0.0.1:8000/register">Create an account</a></div>
+
+      <div class="demo">
+        <span class="demo-title">Demo credentials</span>
+        Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin1234</strong>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const USERS_KEY = 'mf_users', SESSION_KEY = 'mf_session';
+    const BACKEND_ORIGIN = 'http://127.0.0.1:8000';
+    function getUsers() {
+      const u = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+      if (!u['admin']) { u['admin'] = { password: 'admin1234', role: 'ADMIN', avatar: 'A' }; localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+      return u;
+    }
+    function handleLogin() {
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const err = document.getElementById('error-msg');
+      err.style.display = 'none';
+      if (!username || !password) { err.textContent = '⚠ Please fill in all fields.'; err.style.display = 'block'; return; }
+      const user = getUsers()[username];
+      if (!user || user.password !== password) { err.textContent = '⚠ Invalid username or password.'; err.style.display = 'block'; return; }
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ username, role: user.role || 'USER', avatar: user.avatar || username[0].toUpperCase() }));
+      window.location.href = BACKEND_ORIGIN + '/dashboard';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+    if (localStorage.getItem(SESSION_KEY)) window.location.href = BACKEND_ORIGIN + '/dashboard';
+    getUsers();
+  </script>
+</body>
+</html>
