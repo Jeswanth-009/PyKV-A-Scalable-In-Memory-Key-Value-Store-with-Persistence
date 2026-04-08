@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PYKV — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --prussian: #0a1128;
+      --navy: #001f54;
+      --yale: #034078;
+      --cerulean: #1282a2;
+      --white: #fefcfb;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--white);
+      background:
+        radial-gradient(ellipse 70% 58% at 12% 8%, rgba(18,130,162,.24) 0%, transparent 55%),
+        radial-gradient(ellipse 54% 48% at 88% 92%, rgba(3,64,120,.30) 0%, transparent 52%),
+        radial-gradient(ellipse 42% 40% at 58% 44%, rgba(254,252,251,.08) 0%, transparent 60%),
+        linear-gradient(145deg, #00112f 0%, #0a1128 48%, #001f54 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size: 256px;
+      mix-blend-mode: soft-light;
+      opacity: .55;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(254,252,251,.03), transparent 18%, transparent 82%, rgba(0,0,0,.2)),
+        radial-gradient(circle at center, transparent 55%, rgba(0,0,0,.24) 100%);
+    }
+
+    .outer {
+      width: 100%;
+      max-width: 590px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 30px;
+      padding: 28px 24px;
+      border: 1px solid rgba(168,206,230,.12);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.05) inset,
+        0 28px 80px rgba(0,0,0,.42);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.045));
+      border-radius: 24px;
+      padding: 40px 42px 42px;
+      border: 1px solid rgba(168,206,230,.14);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.04) inset,
+        0 16px 44px rgba(0,0,0,.24);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(18,130,162,.08), transparent 42%, transparent 62%, rgba(254,252,251,.02));
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--yale), var(--navy));
+      border-radius: 15px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.28),
+        0 0 0 1px rgba(168,206,230,.08) inset;
+    }
+    .brand-icon svg { width: 20px; height: 20px; }
+
+    .brand-name {
+      display: block;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.42rem;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.05;
+      letter-spacing: .02em;
+    }
+    .brand-sub {
+      display: block;
+      font-size: .44rem;
+      letter-spacing: .32em;
+      color: rgba(180,213,233,.62);
+      margin-top: 4px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 3.15rem;
+      font-weight: 600;
+      font-style: italic;
+      color: var(--white);
+      line-height: 1.02;
+      margin-bottom: 10px;
+      letter-spacing: -.01em;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 8px 30px rgba(0,0,0,.18);
+    }
+
+    .sub-text {
+      font-size: .67rem;
+      color: rgba(214,234,247,.76);
+      margin-bottom: 32px;
+      opacity: .95;
+      position: relative;
+      z-index: 1;
+    }
+
+    .err {
+      background: rgba(3,64,120,.18);
+      border: 1px solid rgba(18,130,162,.22);
+      border-radius: 14px;
+      color: rgba(254,252,251,.92);
+      padding: 12px 16px;
+      font-size: .63rem;
+      margin-bottom: 18px;
+      display: none;
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .field { margin-bottom: 20px; position: relative; z-index: 1; }
+    .field label {
+      display: block;
+      font-size: .45rem;
+      letter-spacing: .30em;
+      color: rgba(180,213,233,.72);
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(168,206,230,.16);
+      border-radius: 14px;
+      color: var(--white);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .87rem;
+      padding: 16px 18px;
+      outline: none;
+      transition: background .2s, border-color .2s, box-shadow .2s, transform .2s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .field input:focus {
+      background: rgba(255,255,255,.07);
+      border-color: rgba(18,130,162,.4);
+      box-shadow: 0 0 0 4px rgba(18,130,162,.12);
+      transform: translateY(-1px);
+    }
+    .field input::placeholder { color: rgba(180,213,233,.34); }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--yale), var(--cerulean));
+      border: none;
+      color: var(--white);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .60rem;
+      font-weight: 500;
+      letter-spacing: .34em;
+      padding: 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.06) inset,
+        0 14px 34px rgba(18,130,162,.18);
+      transition: transform .12s, box-shadow .2s, filter .2s;
+      position: relative;
+      z-index: 1;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,.08) inset,
+        0 20px 42px rgba(18,130,162,.24);
+      filter: brightness(1.04);
+    }
+    .btn:active { transform: translateY(0); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: rgba(168,206,230,.16);
+    }
+    .divider span {
+      font-size: .54rem;
+      color: rgba(180,213,233,.6);
+      letter-spacing: .16em;
+    }
+
+    .link-row {
+      text-align: center;
+      font-size: .66rem;
+      color: rgba(214,234,247,.72);
+      position: relative;
+      z-index: 1;
+    }
+    .link-row a {
+      color: var(--white);
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-color: rgba(18,130,162,.35);
+      transition: text-decoration-color .2s, color .2s;
+    }
+    .link-row a:hover {
+      text-decoration-color: var(--cerulean);
+      color: var(--white);
+    }
+
+    .demo {
+      margin-top: 24px;
+      border: 1px dashed rgba(168,206,230,.16);
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: .63rem;
+      color: rgba(214,234,247,.74);
+      line-height: 2;
+      background: rgba(255,255,255,.025);
+      position: relative;
+      z-index: 1;
+    }
+    .demo .demo-title {
+      font-weight: 500;
+      color: var(--white);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .demo strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+      .outer { padding: 16px; border-radius: 24px; }
+      .card { padding: 30px 22px 28px; border-radius: 20px; }
+      h1 { font-size: 2.5rem; }
+      .brand { margin-bottom: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="outer">
+    <div class="card">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3L21 10L12 21L3 10L12 3Z" stroke="rgba(254,252,251,.75)" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M3 10H21" stroke="rgba(254,252,251,.75)" stroke-width="1.5"/>
+            <path d="M12 3L16.5 10L12 21L7.5 10L12 3Z" stroke="rgba(254,252,251,.28)" stroke-width="1" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">PYKV</span>
+          <span class="brand-sub">LRU · PERSISTENCE · CONTROL PLANE</span>
+        </div>
+      </div>
+
+      <h1>Welcome back</h1>
+      <p class="sub-text">Sign in to access your Dashboard</p>
+
+      <div class="err" id="error-msg"></div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="e.g. admin" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+
+      <button class="btn" onclick="handleLogin()">→ &nbsp;SIGN IN</button>
+
+      <div class="divider"><span>OR</span></div>
+      <div class="link-row">New here? <a href="/register">Create an account</a></div>
+
+      <div class="demo">
+        <span class="demo-title">Demo credentials</span>
+        Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin1234</strong>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const USERS_KEY = 'mf_users', SESSION_KEY = 'mf_session';
+    const BACKEND_ORIGIN = window.location.origin;
+
+    function getUsers() {
+      const u = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+      if (!u['admin']) {
+        u['admin'] = { password: 'admin1234', role: 'ADMIN', avatar: 'A' };
+        localStorage.setItem(USERS_KEY, JSON.stringify(u));
+      }
+      return u;
+    }
+
+    function handleLogin() {
+      const username = document.getElementById('username').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const err = document.getElementById('error-msg');
+      err.style.display = 'none';
+
+      if (!username || !password) {
+        err.textContent = '⚠ Please fill in all fields.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const user = getUsers()[username];
+      if (!user || user.password !== password) {
+        err.textContent = '⚠ Invalid username or password.';
+        err.style.display = 'block';
+        return;
+      }
+
+      localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({
+          username,
+          role: user.role || 'USER',
+          avatar: user.avatar || username[0].toUpperCase()
+        })
+      );
+
+      window.location.href = BACKEND_ORIGIN + '/dashboard';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    if (localStorage.getItem(SESSION_KEY)) {
+      window.location.href = BACKEND_ORIGIN + '/dashboard';
+    }
+
+    getUsers();
+  </script>
+</body>
+</html>

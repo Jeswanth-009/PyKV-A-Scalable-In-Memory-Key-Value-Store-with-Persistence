@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PYKV — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --prussian: #0a1128;
+      --navy: #001f54;
+      --yale: #034078;
+      --cerulean: #1282a2;
+      --white: #fefcfb;
+
+      --bg: #07101f;
+      --bg2: rgba(10, 17, 40, 0.88);
+      --bg3: rgba(0, 31, 84, 0.72);
+      --bg4: rgba(3, 64, 120, 0.5);
+
+      --ink: var(--white);
+      --ink2: rgba(254, 252, 251, 0.84);
+      --ink3: rgba(214, 234, 247, 0.7);
+      --muted: rgba(180, 213, 233, 0.68);
+      --warm: rgba(18, 130, 162, 0.36);
+
+      --sepia: rgba(254, 252, 251, 0.92);
+      --amber: var(--cerulean);
+      --amber2: var(--cerulean);
+      --amber3: rgba(18, 130, 162, 0.14);
+      --rust: var(--yale);
+      --rust2: var(--navy);
+      --rust3: rgba(3, 64, 120, 0.18);
+
+      --green: #72c3d8;
+      --bd: rgba(168, 206, 230, 0.12);
+      --bhi: rgba(168, 206, 230, 0.25);
+      --border: var(--bd);
+      --border2: var(--bhi);
+
+      --parch: transparent;
+      --parch2: rgba(255,255,255,.035);
+      --parch3: rgba(255,255,255,.05);
+      --parch4: rgba(255,255,255,.07);
+
+      --shadow-lg: 0 28px 80px rgba(0, 0, 0, .42);
+      --shadow-md: 0 14px 38px rgba(0, 0, 0, .28);
+      --ff: 'Playfair Display', Georgia, serif;
+      --fm: 'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--fm);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(18,130,162,.22), transparent 30%),
+        radial-gradient(circle at 88% 14%, rgba(3,64,120,.24), transparent 28%),
+        radial-gradient(circle at 70% 88%, rgba(18,130,162,.14), transparent 32%),
+        linear-gradient(145deg, #00112f 0%, #0a1128 45%, #001f54 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size: 256px;
+      mix-blend-mode: soft-light;
+      opacity: .55;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        linear-gradient(180deg, rgba(254,252,251,.02), transparent 18%, transparent 82%, rgba(0,0,0,.22)),
+        radial-gradient(circle at center, transparent 55%, rgba(0,0,0,.24) 100%);
+    }
+
+    .nav {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 64px;
+      background: rgba(6, 14, 32, 0.7);
+      border-bottom: 1px solid rgba(180,213,233,.12);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 8px 30px rgba(0,0,0,.22);
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .nav-logo {
+      font-family: var(--ff);
+      font-size: 1.18rem;
+      font-style: italic;
+      color: var(--white);
+      letter-spacing: .01em;
+      text-shadow: 0 2px 18px rgba(18,130,162,.18);
+    }
+    .nav-tag {
+      font-size: .48rem;
+      letter-spacing: .24em;
+      color: rgba(214,234,247,.62);
+      border: 1px solid rgba(168,206,230,.18);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .nav-center { display: flex; align-items: center; gap: 24px; }
+    .nav-stat { text-align: center; }
+    .nav-stat-val {
+      font-family: var(--ff);
+      font-size: 1.08rem;
+      color: var(--white);
+      line-height: 1;
+      font-weight: 700;
+    }
+    .nav-stat-lbl {
+      font-size: .42rem;
+      letter-spacing: .24em;
+      color: rgba(180,213,233,.5);
+      margin-top: 3px;
+    }
+    .nav-sep {
+      width: 1px; height: 28px;
+      background: rgba(168,206,230,.13);
+    }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 7px;
+      font-size: .5rem; letter-spacing: .2em;
+      color: rgba(214,234,247,.62);
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--cerulean);
+      box-shadow: 0 0 12px rgba(18,130,162,.7);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-user { font-size: .66rem; color: rgba(214,234,247,.62); }
+    .nav-user strong { color: var(--white); }
+    .nav-role {
+      font-size: .44rem;
+      letter-spacing: .18em;
+      color: rgba(214,234,247,.78);
+      border: 1px solid rgba(168,206,230,.18);
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+    }
+    .btn-out {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border: 1px solid rgba(168,206,230,.18);
+      color: rgba(214,234,247,.8);
+      font-family: var(--fm);
+      font-size: .54rem;
+      letter-spacing: .14em;
+      padding: 8px 15px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all .22s ease;
+    }
+    .btn-out:hover {
+      border-color: rgba(18,130,162,.48);
+      color: var(--white);
+      box-shadow: 0 0 0 3px rgba(18,130,162,.12);
+      transform: translateY(-1px);
+    }
+
+    .fill-bar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 28px;
+      background: rgba(8, 18, 42, 0.58);
+      border-bottom: 1px solid var(--border);
+      font-size: .56rem;
+      color: var(--muted);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .fill-track {
+      flex: 1; height: 5px;
+      background: rgba(255,255,255,.08);
+      border-radius: 999px; overflow: hidden;
+    }
+    .fill-inner {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--yale), var(--cerulean));
+      border-radius: 999px;
+      transition: width .5s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 16px rgba(18,130,162,.5);
+    }
+    .fill-pct { color: var(--white); font-weight: 500; min-width: 32px; }
+    .fill-warn {
+      color: rgba(254,252,251,.88);
+      display: none;
+      padding: 4px 10px;
+      border: 1px solid rgba(18,130,162,.24);
+      background: rgba(18,130,162,.08);
+      border-radius: 999px;
+    }
+
+    .main {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 380px;
+      gap: 14px;
+      padding: 14px;
+      min-height: calc(100vh - 64px - 45px);
+    }
+
+    .panel {
+      display: flex; flex-direction: column;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.028));
+      border: 1px solid rgba(168,206,230,.12);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .panel-hd {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    }
+    .panel-hd-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+      box-shadow: 0 0 16px currentColor;
+    }
+    .panel-hd-title {
+      font-size: .52rem;
+      letter-spacing: .28em;
+      color: rgba(214,234,247,.74);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .panel-body { flex: 1; padding: 20px; overflow: hidden; }
+
+    .lru-panel { grid-column: 1 / 3; }
+    .lru-list { display: flex; flex-direction: column; }
+
+    .lru-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(168,206,230,.08);
+      cursor: pointer;
+      transition: background .22s ease, transform .22s ease;
+      position: relative; overflow: hidden;
+      background: rgba(255,255,255,.01);
+    }
+    .lru-row:last-child { border-bottom: none; }
+    .lru-row::before {
+      content: '';
+      position: absolute; left: 0; top: 10px; bottom: 10px;
+      width: 4px;
+      background: var(--cerulean);
+      border-radius: 0 999px 999px 0;
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 0 18px rgba(18,130,162,.45);
+    }
+    .lru-row:hover {
+      background: rgba(18,130,162,.05);
+      transform: translateX(2px);
+    }
+    .lru-row:hover::before { transform: scaleY(1); }
+    .lru-row.mru::before { transform: scaleY(1); background: var(--cerulean); }
+    .lru-row.lru-entry::before { transform: scaleY(1); background: var(--yale); }
+
+    .lru-rank { font-size: .52rem; color: rgba(180,213,233,.48); width: 20px; flex-shrink: 0; text-align: right; }
+    .lru-heat {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 16px rgba(18,130,162,.25);
+    }
+    .lru-key {
+      font-size: .9rem;
+      color: var(--white);
+      font-weight: 500;
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+    .lru-value {
+      font-size: .72rem;
+      color: rgba(214,234,247,.72);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lru-tag {
+      font-size: .44rem;
+      letter-spacing: .16em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .tag-mru {
+      background: rgba(18,130,162,.12);
+      color: var(--white);
+      border: 1px solid rgba(18,130,162,.28);
+    }
+    .tag-lru {
+      background: rgba(3,64,120,.16);
+      color: rgba(214,234,247,.92);
+      border: 1px solid rgba(3,64,120,.34);
+    }
+
+    @keyframes evictFlash {
+      0%   { background: rgba(3,64,120,.18); transform: translateX(0); }
+      40%  { background: rgba(18,130,162,.18); transform: translateX(10px); }
+      100% { background: transparent; transform: translateX(-120px); opacity: 0; }
+    }
+    .evicting { animation: evictFlash .6s ease forwards; pointer-events: none; }
+
+    @keyframes promoteFlash {
+      0%   { background: rgba(18,130,162,.14); }
+      100% { background: transparent; }
+    }
+    .promoting { animation: promoteFlash .9s ease forwards; }
+
+    .lru-empty {
+      padding: 62px 20px;
+      text-align: center;
+      color: rgba(180,213,233,.58);
+      font-size: .68rem;
+      line-height: 2.4;
+    }
+    .lru-empty .empty-icon {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      opacity: .42;
+      color: var(--cerulean);
+      text-shadow: 0 0 18px rgba(18,130,162,.24);
+    }
+
+    .test-panel { grid-column: 3; grid-row: 1 / 3; display: flex; flex-direction: column; }
+
+    .op-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    .op-tab {
+      flex: 1;
+      padding: 12px 0;
+      text-align: center;
+      font-size: .5rem;
+      letter-spacing: .2em;
+      color: rgba(180,213,233,.6);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s ease;
+    }
+    .op-tab.active {
+      color: var(--white);
+      border-bottom-color: var(--cerulean);
+      background: rgba(18,130,162,.07);
+    }
+    .op-tab:hover:not(.active) { color: rgba(254,252,251,.84); }
+
+    .op-form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .op-form.hidden { display: none; }
+
+    .f-label {
+      font-size: .46rem;
+      letter-spacing: .26em;
+      color: rgba(180,213,233,.62);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .f-input {
+      width: 100%;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(168,206,230,.16);
+      border-radius: 14px;
+      color: var(--white);
+      font-family: var(--fm);
+      font-size: .8rem;
+      padding: 13px 15px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s, transform .2s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .f-input:focus {
+      border-color: rgba(18,130,162,.45);
+      background: rgba(255,255,255,.065);
+      box-shadow: 0 0 0 3px rgba(18,130,162,.12);
+      transform: translateY(-1px);
+    }
+    .f-input::placeholder { color: rgba(180,213,233,.34); }
+    textarea.f-input { resize: vertical; min-height: 88px; font-size: .75rem; }
+
+    .f-hint { font-size: .5rem; color: rgba(180,213,233,.42); margin-top: -8px; }
+
+    .btn-op {
+      width: 100%;
+      border: none;
+      font-family: var(--fm);
+      font-size: .58rem;
+      font-weight: 500;
+      letter-spacing: .25em;
+      padding: 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: opacity .2s, transform .12s, box-shadow .2s;
+    }
+    .btn-op:hover { opacity: .96; transform: translateY(-1px); }
+    .btn-set {
+      background: linear-gradient(135deg, var(--yale), var(--cerulean));
+      color: var(--white);
+      box-shadow: 0 10px 28px rgba(18,130,162,.2);
+    }
+    .btn-get {
+      background: linear-gradient(135deg, rgba(18,130,162,.22), rgba(18,130,162,.12));
+      color: var(--white);
+      border: 1px solid rgba(18,130,162,.26);
+    }
+    .btn-del {
+      background: linear-gradient(135deg, var(--navy), var(--yale));
+      color: var(--white);
+      box-shadow: 0 10px 28px rgba(0,31,84,.22);
+    }
+    .btn-clear {
+      background: rgba(255,255,255,.04);
+      color: rgba(214,234,247,.82);
+      border: 1px solid rgba(168,206,230,.16);
+    }
+
+    .op-response {
+      margin: 0 20px 16px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(168,206,230,.12);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: .68rem;
+      color: rgba(214,234,247,.74);
+      min-height: 60px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .op-response.ok {
+      color: rgba(254,252,251,.92);
+      border-color: rgba(18,130,162,.24);
+      background: rgba(18,130,162,.08);
+    }
+    .op-response.err {
+      color: rgba(254,252,251,.92);
+      border-color: rgba(3,64,120,.28);
+      background: rgba(3,64,120,.12);
+    }
+    .op-response.info {
+      color: rgba(214,234,247,.9);
+      border-color: rgba(168,206,230,.18);
+      background: rgba(255,255,255,.05);
+    }
+
+    .quick-keys { padding: 0 20px 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .qk {
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(168,206,230,.12);
+      color: rgba(214,234,247,.72);
+      font-family: var(--fm);
+      font-size: .5rem;
+      padding: 6px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .qk:hover {
+      border-color: rgba(18,130,162,.34);
+      color: var(--white);
+      background: rgba(18,130,162,.08);
+    }
+
+    .log-panel { grid-column: 1 / 2; max-height: 360px; }
+
+    .log-terminal {
+      background:
+        linear-gradient(180deg, rgba(4,11,28,.86), rgba(7,16,31,.96));
+      font-size: .65rem;
+      line-height: 1.9;
+      padding: 16px 18px;
+      height: 292px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .log-terminal::-webkit-scrollbar { width: 6px; }
+    .log-terminal::-webkit-scrollbar-track { background: rgba(255,255,255,.03); }
+    .log-terminal::-webkit-scrollbar-thumb {
+      background: rgba(168,206,230,.2);
+      border-radius: 999px;
+    }
+
+    .log-line { display: flex; gap: 10px; margin-bottom: 2px; }
+    .log-ts { color: rgba(180,213,233,.32); flex-shrink: 0; }
+    .log-op { font-weight: 500; flex-shrink: 0; min-width: 52px; }
+    .log-op.SET { color: var(--cerulean); }
+    .log-op.DEL { color: rgba(214,234,247,.92); }
+    .log-op.COMPACT { color: rgba(214,234,247,.8); }
+    .log-key { color: var(--white); }
+    .log-val { color: rgba(180,213,233,.46); }
+
+    .log-cursor {
+      display: inline-block; width: 7px; height: 13px;
+      background: var(--cerulean);
+      box-shadow: 0 0 12px rgba(18,130,162,.55);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle; margin-left: 4px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .stats-panel { grid-column: 2 / 3; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card {
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+      border: 1px solid rgba(168,206,230,.12);
+      border-radius: 18px;
+      padding: 16px;
+      transition: border-color .2s, transform .2s, background .2s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.02);
+    }
+    .stat-card:hover {
+      border-color: rgba(18,130,162,.26);
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    }
+    .stat-lbl {
+      font-size: .44rem;
+      letter-spacing: .22em;
+      color: rgba(180,213,233,.58);
+      margin-bottom: 10px;
+    }
+    .stat-val {
+      font-family: var(--ff);
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1;
+      text-shadow: 0 6px 28px rgba(0,0,0,.18);
+    }
+    .stat-val.amber { color: var(--white); }
+    .stat-val.rust  { color: rgba(214,234,247,.92); }
+    .stat-val.sepia { color: var(--cerulean); }
+    .stat-val.ink   { color: var(--white); }
+
+    .evict-list {
+      margin-top: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(168,206,230,.12);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .evict-hd {
+      padding: 12px 14px;
+      font-size: .46rem;
+      letter-spacing: .22em;
+      color: rgba(180,213,233,.62);
+      border-bottom: 1px solid rgba(168,206,230,.1);
+    }
+    .evict-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(168,206,230,.08);
+      font-size: .62rem;
+    }
+    .evict-row:last-child { border-bottom: none; }
+    .evict-key { color: var(--white); }
+    .evict-time { color: rgba(180,213,233,.56); font-size: .56rem; }
+    .evict-none {
+      padding: 16px;
+      font-size: .6rem;
+      color: rgba(180,213,233,.48);
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: rgba(7,16,31,.94);
+      border: 1px solid rgba(168,206,230,.16);
+      color: var(--white);
+      font-family: var(--fm);
+      font-size: .64rem;
+      padding: 12px 20px;
+      border-radius: 999px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.42);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      max-width: 360px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok  { border-color: rgba(18,130,162,.34); box-shadow: 0 18px 42px rgba(0,0,0,.42), 0 0 0 1px rgba(18,130,162,.06) inset; }
+    .toast.err { border-color: rgba(3,64,120,.3); }
+
+    @media (max-width: 1100px) {
+      .main { grid-template-columns: 1fr 1fr; }
+      .lru-panel { grid-column: 1 / 3; }
+      .test-panel { grid-column: 1 / 3; grid-row: auto; }
+      .log-panel, .stats-panel { grid-column: span 1; }
+    }
+    @media (max-width: 700px) {
+      .main { grid-template-columns: 1fr; }
+      .lru-panel, .test-panel, .log-panel, .stats-panel { grid-column: 1; }
+      .nav-center { display: none; }
+      .nav { padding: 0 16px; }
+      .fill-bar { padding: 10px 16px; }
+      .panel-hd { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-left">
+      <span class="nav-logo">PYKV</span>
+      <span class="nav-tag">DEEP OCEAN NODE</span>
+    </div>
+    <div class="nav-center">
+      <div class="nav-stat">
+        <div class="nav-stat-val" id="n-size">0/5</div>
+        <div class="nav-stat-lbl">CAPACITY</div>
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-stat">
+        <div class="nav-stat-val" id="n-hitrate">0%</div>
+        <div class="nav-stat-lbl">HIT RATE</div>
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-stat">
+        <div class="nav-stat-val" id="n-evictions">0</div>
+        <div class="nav-stat-lbl">EVICTIONS</div>
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-stat">
+        <div class="nav-stat-val" id="n-mem">0 B</div>
+        <div class="nav-stat-lbl">MEMORY</div>
+      </div>
+      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user">Signed in as <strong id="nav-user">—</strong></span>
+      <span class="nav-role" id="nav-role">USER</span>
+      <button class="btn-out" onclick="signOut()">SIGN OUT</button>
+    </div>
+  </nav>
+
+  <div class="fill-bar">
+    <span id="fb-label">Cache: 0 / 5 keys</span>
+    <div class="fill-track"><div class="fill-inner" id="fb-fill"></div></div>
+    <span class="fill-pct" id="fb-pct">0%</span>
+    <span class="fill-warn" id="fb-warn">⚡ Cache full — LRU will be evicted on next SET</span>
+  </div>
+
+  <div class="main">
+
+    <div class="panel lru-panel">
+      <div class="panel-hd">
+        <span class="panel-hd-dot" style="background:var(--amber2)"></span>
+        <span class="panel-hd-title">LRU Cache Visualizer</span>
+        <span style="font-size:.5rem;color:rgba(180,213,233,.5);margin-left:auto;margin-right:10px">MRU → LRU · top = most recently used</span>
+        <button onclick="clearAll()"
+          style="background:rgba(255,255,255,.03);border:1px solid var(--border2);color:rgba(214,234,247,.7);font-family:var(--fm);font-size:.48rem;letter-spacing:.14em;padding:6px 12px;border-radius:999px;cursor:pointer;transition:all .2s"
+          onmouseover="this.style.borderColor='rgba(18,130,162,.42)';this.style.color='var(--white)';this.style.boxShadow='0 0 0 3px rgba(18,130,162,.10)'"
+          onmouseout="this.style.borderColor='var(--border2)';this.style.color='rgba(214,234,247,.7)';this.style.boxShadow='none'">FLUSH ALL</button>
+      </div>
+      <div id="lru-list" class="lru-list">
+        <div class="lru-empty">
+          <div class="empty-icon">◫</div>
+          Cache is empty.<br>Use the Testing Tool → to SET your first key.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel test-panel">
+      <div class="panel-hd">
+        <span class="panel-hd-dot" style="background:var(--sepia)"></span>
+        <span class="panel-hd-title">Testing Tool</span>
+      </div>
+      <div class="op-tabs">
+        <div class="op-tab active" onclick="switchTab('set',this)">SET</div>
+        <div class="op-tab" onclick="switchTab('get',this)">GET</div>
+        <div class="op-tab" onclick="switchTab('del',this)">DEL</div>
+        <div class="op-tab" onclick="switchTab('all',this)">LIST</div>
+      </div>
+
+      <div class="op-form" id="form-set">
+        <div>
+          <div class="f-label">Key (string)</div>
+          <input class="f-input" id="set-key" placeholder="e.g. user:42" autocomplete="off"/>
+        </div>
+        <div>
+          <div class="f-label">Value (any JSON)</div>
+          <textarea class="f-input" id="set-val" placeholder='e.g. {"name":"Alice","score":99}'></textarea>
+          <div class="f-hint">Strings, numbers, objects, arrays all valid.</div>
+        </div>
+        <button class="btn-op btn-set" onclick="doSet()">→ SET KEY</button>
+      </div>
+
+      <div class="op-form hidden" id="form-get">
+        <div>
+          <div class="f-label">Key to retrieve</div>
+          <input class="f-input" id="get-key" placeholder="e.g. user:42"/>
+        </div>
+        <button class="btn-op btn-get" onclick="doGet()">→ GET KEY</button>
+        <div class="f-hint">Accessing a key promotes it to MRU position.</div>
+      </div>
+
+      <div class="op-form hidden" id="form-del">
+        <div>
+          <div class="f-label">Key to delete</div>
+          <input class="f-input" id="del-key" placeholder="e.g. user:42"/>
+        </div>
+        <button class="btn-op btn-del" onclick="doDel()">→ DELETE KEY</button>
+      </div>
+
+      <div class="op-form hidden" id="form-all">
+        <button class="btn-op btn-get" onclick="doList()">→ LIST ALL KEYS</button>
+        <button class="btn-op btn-clear" onclick="clearAll()">⊠ FLUSH CACHE</button>
+        <button class="btn-op btn-clear" onclick="doCompact()" style="color:var(--white);border-color:rgba(18,130,162,.3)">⊡ COMPACT AOF</button>
+      </div>
+
+      <div class="op-response" id="op-resp">Response will appear here…</div>
+
+      <div style="padding:0 20px;font-size:.44rem;letter-spacing:.2em;color:rgba(180,213,233,.48);margin-bottom:8px">QUICK KEYS</div>
+      <div class="quick-keys">
+        <span class="qk" onclick="quickSet('user:1','Alice')">user:1</span>
+        <span class="qk" onclick="quickSet('user:2','Bob')">user:2</span>
+        <span class="qk" onclick="quickSet('session:abc','{&quot;active&quot;:true}')">session:abc</span>
+        <span class="qk" onclick="quickSet('config:theme','dark')">config:theme</span>
+        <span class="qk" onclick="quickSet('cache:hit','99')">cache:hit</span>
+        <span class="qk" onclick="quickSet('score:top','1000')">score:top</span>
+        <span class="qk" onclick="quickSet('flag:beta','true')">flag:beta</span>
+      </div>
+    </div>
+
+    <div class="panel log-panel">
+      <div class="panel-hd">
+        <span class="panel-hd-dot" style="background:var(--rust2)"></span>
+        <span class="panel-hd-title">AOF Log Monitor</span>
+        <span style="margin-left:auto;font-size:.44rem;letter-spacing:.14em;padding:4px 10px;border-radius:999px;background:rgba(3,64,120,.16);color:rgba(214,234,247,.92);border:1px solid rgba(3,64,120,.28)">LIVE STREAM</span>
+      </div>
+      <div class="log-terminal" id="log-term">
+        <div class="log-line">
+          <span class="log-ts">[system]</span>
+          <span class="log-op SET">INFO</span>
+          <span class="log-key">Waiting for log entries…</span>
+          <span class="log-cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel stats-panel">
+      <div class="panel-hd">
+        <span class="panel-hd-dot" style="background:var(--sepia)"></span>
+        <span class="panel-hd-title">Cache Statistics</span>
+      </div>
+      <div class="panel-body" style="overflow-y:auto">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-lbl">CACHE HITS</div><div class="stat-val amber" id="s-hits">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">CACHE MISSES</div><div class="stat-val rust" id="s-misses">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">HIT RATE</div><div class="stat-val sepia" id="s-hitrate">0%</div></div>
+          <div class="stat-card"><div class="stat-lbl">TOTAL OPS</div><div class="stat-val ink" id="s-total">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">EVICTIONS</div><div class="stat-val rust" id="s-evictions">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">MEMORY</div><div class="stat-val amber" id="s-mem">0 B</div></div>
+        </div>
+        <div class="evict-list">
+          <div class="evict-hd">RECENT EVICTIONS</div>
+          <div id="evict-rows"><div class="evict-none">No evictions yet</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API  = window.location.origin;
+    const SK   = 'mf_session';
+    const POLL = 1500;
+
+    const session = JSON.parse(localStorage.getItem(SK) || 'null');
+    if (!session) location.href = '/login';
+    document.getElementById('nav-user').textContent = session?.username || '—';
+    document.getElementById('nav-role').textContent = session?.role || 'USER';
+    function signOut() { localStorage.removeItem(SK); location.href = '/login'; }
+
+    let lastKeys = [];
+    let logSeenIds = new Set();  // track by unique ts+key to avoid duplicates
+
+    let toastTimer;
+    function showToast(msg, type = 'ok') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = `toast show ${type}`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.className = 'toast', 2800);
+    }
+
+    function fmtBytes(b) {
+      if (b < 1024) return b + ' B';
+      if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+      return (b / 1048576).toFixed(2) + ' MB';
+    }
+
+    function fmtTs(ts) {
+      return new Date(ts * 1000).toLocaleTimeString('en-GB', { hour12: false });
+    }
+
+    function heatColor(rank, total) {
+      if (total <= 1) return 'var(--cerulean)';
+      const t = (rank - 1) / (total - 1);
+      if (t < 0.33) return 'var(--cerulean)';
+      if (t < 0.66) return 'rgba(254,252,251,.88)';
+      return 'var(--yale)';
+    }
+
+    function renderLRU(items) {
+      const container = document.getElementById('lru-list');
+      const newKeys = items.map(i => i.key);
+      if (items.length === 0) {
+        container.innerHTML = `<div class="lru-empty"><div class="empty-icon">◫</div>Cache is empty.<br>Use the Testing Tool → to SET your first key.</div>`;
+        lastKeys = []; return;
+      }
+      const promoted = newKeys.filter((k, i) => { const p = lastKeys.indexOf(k); return p === -1 || p > i; });
+      const html = items.map((item, idx) => {
+        const isMRU = idx === 0;
+        const isLRU = idx === items.length - 1 && items.length > 1;
+        const color = heatColor(idx + 1, items.length);
+        const tag   = isMRU ? '<span class="lru-tag tag-mru">MRU</span>'
+                    : isLRU ? '<span class="lru-tag tag-lru">LRU ← next evicted</span>'
+                    : '';
+        const val = typeof item.value === 'object' ? JSON.stringify(item.value) : String(item.value ?? '');
+        const extraClass = promoted.includes(item.key) ? ' promoting' : '';
+        return `<div class="lru-row${isMRU?' mru':''}${isLRU?' lru-entry':''}${extraClass}" data-key="${item.key}" onclick="quickGet('${item.key}')">
+          <span class="lru-rank">${idx + 1}</span>
+          <span class="lru-heat" style="background:${color}"></span>
+          <span class="lru-key">${item.key}</span>
+          <span class="lru-value">${val}</span>${tag}
+        </div>`;
+      }).join('');
+      container.innerHTML = html;
+      lastKeys = newKeys;
+    }
+
+    function renderLogs(entries) {
+      const term = document.getElementById('log-term');
+      // Only show entries we haven't seen before (dedup by ts+key+op)
+      const newEntries = entries.filter(e => {
+        const id = `${e.ts}|${e.op}|${e.key}`;
+        if (logSeenIds.has(id)) return false;
+        logSeenIds.add(id);
+        return true;
+      });
+      if (!newEntries.length) return;
+      if (logSeenIds.size === newEntries.length) term.innerHTML = ''; // first load
+      newEntries.forEach(e => {
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        const valText = e.value !== undefined
+          ? `<span class="log-val"> → ${JSON.stringify(e.value).slice(0,60)}</span>` : '';
+        line.innerHTML = `<span class="log-ts">[${fmtTs(e.ts)}]</span><span class="log-op ${e.op}">${e.op.padEnd(7)}</span><span class="log-key">${e.key||'—'}</span>${valText}`;
+        term.appendChild(line);
+      });
+      term.scrollTop = term.scrollHeight;
+      const old = term.querySelector('.log-cursor');
+      if (old) old.remove();
+      const cur = document.createElement('span');
+      cur.className = 'log-cursor'; term.appendChild(cur);
+    }
+
+    function renderStats(s) {
+      const capacity = Number.isFinite(s?.capacity) ? s.capacity : 0;
+      const currentSize = Number.isFinite(s?.current_size) ? s.current_size : 0;
+      const hitRate = Number.isFinite(s?.hit_rate_pct) ? s.hit_rate_pct : 0;
+      const evictions = Number.isFinite(s?.total_evictions) ? s.total_evictions : 0;
+      const memoryBytes = Number.isFinite(s?.memory_bytes) ? s.memory_bytes : 0;
+      const totalGets = Number.isFinite(s?.total_gets) ? s.total_gets : 0;
+      const totalSets = Number.isFinite(s?.total_sets) ? s.total_sets : 0;
+      const totalHits = Number.isFinite(s?.total_hits) ? s.total_hits : 0;
+      const totalMisses = Number.isFinite(s?.total_misses) ? s.total_misses : 0;
+      const pct = Number.isFinite(s?.fill_pct) ? Math.round(s.fill_pct) : 0;
+
+      document.getElementById('n-size').textContent      = `${currentSize}/${capacity}`;
+      document.getElementById('n-hitrate').textContent   = `${hitRate}%`;
+      document.getElementById('n-evictions').textContent = evictions;
+      document.getElementById('n-mem').textContent       = fmtBytes(memoryBytes);
+      document.getElementById('fb-fill').style.width   = `${pct}%`;
+      document.getElementById('fb-pct').textContent    = `${pct}%`;
+      document.getElementById('fb-label').textContent  = `Cache: ${currentSize} / ${capacity} keys`;
+      document.getElementById('fb-warn').style.display = pct >= 100 ? 'inline' : 'none';
+      document.getElementById('s-hits').textContent      = totalHits;
+      document.getElementById('s-misses').textContent    = totalMisses;
+      document.getElementById('s-hitrate').textContent   = `${hitRate}%`;
+      document.getElementById('s-total').textContent     = totalGets + totalSets;
+      document.getElementById('s-evictions').textContent = evictions;
+      document.getElementById('s-mem').textContent       = fmtBytes(memoryBytes);
+      const evRow = document.getElementById('evict-rows');
+      if (!s.recent_evictions?.length) {
+        evRow.innerHTML = '<div class="evict-none">No evictions yet</div>';
+      } else {
+        evRow.innerHTML = s.recent_evictions.map(e =>
+          `<div class="evict-row"><span class="evict-key">⊗ ${e.key}</span><span class="evict-time">${fmtTs(e.evicted_at)}</span></div>`
+        ).join('');
+      }
+    }
+
+    async function pollAll() {
+      try {
+        const [sr, lr] = await Promise.all([
+          fetch(`${API}/stats`), fetch(`${API}/logs?limit=200`)
+        ]);
+        if (sr.ok) { const s = await sr.json(); renderStats(s); fetchAllItems(); }
+        if (lr.ok) { const l = await lr.json(); renderLogs(l.entries); }
+      } catch (_) {}
+    }
+
+    async function fetchAllItems() {
+      try {
+        const r = await fetch(`${API}/keys`);
+        if (!r.ok) return;
+        const d = await r.json();
+        renderLRU(d.items);
+      } catch (_) {}
+    }
+
+    function setResp(msg, cls = '') {
+      const el = document.getElementById('op-resp');
+      el.textContent = msg; el.className = `op-response ${cls}`;
+    }
+
+    function switchTab(name, el) {
+      document.querySelectorAll('.op-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.op-form').forEach(f => f.classList.add('hidden'));
+      el.classList.add('active');
+      document.getElementById(`form-${name}`).classList.remove('hidden');
+    }
+
+    async function doSet() {
+      const key = document.getElementById('set-key').value.trim();
+      const rawVal = document.getElementById('set-val').value.trim();
+      if (!key) { setResp('⚠ Key is required.', 'err'); return; }
+      let value;
+      try { value = rawVal ? JSON.parse(rawVal) : rawVal; } catch (_) { value = rawVal; }
+      setResp('Setting…', '');
+      try {
+        const r = await fetch(`${API}/keys/${encodeURIComponent(key)}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value })
+        });
+        const d = await r.json();
+        if (!r.ok) { setResp(`Error ${r.status}: ${d.detail}`, 'err'); return; }
+        let msg = `✓ SET  ${key}`;
+        if (d.evicted_key) msg += `\n⊗ Evicted: "${d.evicted_key}"`;
+        setResp(msg, 'ok');
+        showToast(d.evicted_key ? `SET "${key}" — evicted "${d.evicted_key}"` : `SET "${key}"`, 'ok');
+        pollAll();
+      } catch (_) { setResp('⚠ Cannot reach API. Is the server running?', 'err'); }
+    }
+
+    async function doGet() {
+      const key = document.getElementById('get-key').value.trim();
+      if (!key) { setResp('⚠ Key is required.', 'err'); return; }
+      setResp('Getting…', '');
+      try {
+        const r = await fetch(`${API}/keys/${encodeURIComponent(key)}`);
+        const d = await r.json();
+        if (r.status === 404) { setResp(`✗ Key "${key}" not found.`, 'err'); return; }
+        if (!r.ok) { setResp(`Error ${r.status}: ${d.detail}`, 'err'); return; }
+        setResp(`✓ GET  ${key}\n→ ${JSON.stringify(d.value, null, 2)}`, 'ok');
+        showToast(`GET "${key}" → ${JSON.stringify(d.value).slice(0,40)}`, 'ok');
+        pollAll();
+      } catch (_) { setResp('⚠ Cannot reach API.', 'err'); }
+    }
+
+    async function quickGet(key) {
+      document.getElementById('get-key').value = key;
+      switchTab('get', document.querySelectorAll('.op-tab')[1]);
+      await doGet();
+    }
+
+    async function doDel() {
+      const key = document.getElementById('del-key').value.trim();
+      if (!key) { setResp('⚠ Key is required.', 'err'); return; }
+      setResp('Deleting…', '');
+      try {
+        const r = await fetch(`${API}/keys/${encodeURIComponent(key)}`, { method: 'DELETE' });
+        const d = await r.json();
+        if (r.status === 404) { setResp(`✗ Key "${key}" not found.`, 'err'); return; }
+        if (!r.ok) { setResp(`Error ${r.status}: ${d.detail}`, 'err'); return; }
+        setResp(`⊗ DEL  ${key}`, 'ok');
+        showToast(`Deleted "${key}"`, 'ok');
+        pollAll();
+      } catch (_) { setResp('⚠ Cannot reach API.', 'err'); }
+    }
+
+    async function doList() {
+      setResp('Loading…', '');
+      try {
+        const r = await fetch(`${API}/keys`);
+        const d = await r.json();
+        if (!d.items.length) { setResp('Cache is empty.', 'info'); return; }
+        setResp(d.items.map(i => `${i.rank}. ${i.key} → ${JSON.stringify(i.value)}`).join('\n'), 'ok');
+      } catch (_) { setResp('⚠ Cannot reach API.', 'err'); }
+    }
+
+    async function clearAll() {
+      try {
+        await fetch(`${API}/keys`, { method: 'DELETE' });
+        showToast('Cache flushed.', 'ok');
+        setResp('✓ Cache cleared.', 'ok');
+        pollAll();
+      } catch (_) { setResp('⚠ Cannot reach API.', 'err'); }
+    }
+
+    async function doCompact() {
+      setResp('Compacting AOF…', 'info');
+      try {
+        const r = await fetch(`${API}/admin/compact`, { method: 'POST' });
+        const d = await r.json();
+        setResp(`✓ Compaction done\n${d.original_lines} → ${d.compacted_lines} lines (${d.removed_lines} removed)`, 'ok');
+        showToast(`AOF compacted — ${d.removed_lines} lines removed.`, 'ok');
+        logSeenIds = new Set(); pollAll();
+      } catch (_) { setResp('⚠ Cannot reach API.', 'err'); }
+    }
+
+    function quickSet(key, val) {
+      document.getElementById('set-key').value = key;
+      document.getElementById('set-val').value = val;
+      switchTab('set', document.querySelectorAll('.op-tab')[0]);
+      doSet();
+    }
+
+    document.getElementById('set-key').addEventListener('keydown', e => { if (e.key === 'Enter') doSet(); });
+    document.getElementById('set-val').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSet(); } });
+    document.getElementById('get-key').addEventListener('keydown', e => { if (e.key === 'Enter') doGet(); });
+    document.getElementById('del-key').addEventListener('keydown', e => { if (e.key === 'Enter') doDel(); });
+
+    pollAll();
+    setInterval(pollAll, POLL);
+  </script>
+</body>
+</html>
